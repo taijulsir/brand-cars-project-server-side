@@ -29,6 +29,8 @@ async function run() {
 
     const brandCarsCollection = client.db("brandsCardDB").collection('brandsCars')
     const brandsNameCollection = client.db("brandsCardDB").collection('brandNames')
+    const cartCollection = client.db("brandsCardDB").collection('cart')
+
     
     //  create data from client server 
     app.post('/brandNames', async (req, res) => {
@@ -54,6 +56,31 @@ async function run() {
       const result = await brandCarsCollection.findOne(query)
       res.send(result)
     })
+
+    app.put('/brandNames/:id',async(req,res)=>{
+      const update = req.body;
+      const id= req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const options = { upsert: true };
+      const updatedDoc = {
+
+        // name, brandName, type, description, price, rating, brandImage
+
+          $set: {
+              name:update.name,
+              brandName:update.brandName, 
+              type:update.type, 
+              description:update.description, 
+              price:update.price, 
+              rating:update.rating,
+              brandImage:update.brandImage,
+             
+          }
+      }
+
+      const result = await brandCarsCollection.updateOne(query,updatedDoc,options)
+      res.send(result)
+  })
   
     // load all 6 brands name and images
     app.get('/brandNames', async (req, res) => {
@@ -62,6 +89,25 @@ async function run() {
       const result = await cursor.toArray()
       res.send(result)
     })
+
+    // 
+    app.post("/addTocart", async (req, res) => {
+      const cart = req.body;
+      console.log("new post ", cart);
+      const result = await cartCollection.insertOne(cart);
+      console.log(result);
+      res.send(result);
+  });
+
+  // 
+  app.get("/addTocart/:email", async (req, res) => {
+    const find = req.params.email;
+    console.log(find);
+    const query = { email: find };
+    const cursor = cartCollection.find(query);
+    const result = await cursor.toArray();
+    res.send(result);
+});
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
