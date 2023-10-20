@@ -31,15 +31,15 @@ async function run() {
     const brandsNameCollection = client.db("brandsCardDB").collection('brandNames')
     const cartCollection = client.db("brandsCardDB").collection('cart')
 
-    
-    //  create data from client server 
+
+    //  create cars collection 
     app.post('/brandNames', async (req, res) => {
       const brands = req.body;
       const result = await brandCarsCollection.insertOne(brands)
       res.send(result)
     })
 
-    // Read multiple product brand wise
+    // Read multiple cars brand wise
     app.get('/brandNames/:brandName', async (req, res) => {
       const name = req.params.brandName;
       const query = { brandName: name }
@@ -48,40 +48,41 @@ async function run() {
       res.send(result)
     })
 
-    // Read single product brand wise
+    // Read single cars brand wise
     app.get('/cars/:id', async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId (id) }
+      const query = { _id: new ObjectId(id) }
       console.log(query)
       const result = await brandCarsCollection.findOne(query)
       res.send(result)
     })
 
-    app.put('/brandNames/:id',async(req,res)=>{
+    // update cars information
+    app.put('/brandNames/:id', async (req, res) => {
       const update = req.body;
-      const id= req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
       const options = { upsert: true };
       const updatedDoc = {
 
         // name, brandName, type, description, price, rating, brandImage
 
-          $set: {
-              name:update.name,
-              brandName:update.brandName, 
-              type:update.type, 
-              description:update.description, 
-              price:update.price, 
-              rating:update.rating,
-              brandImage:update.brandImage,
-             
-          }
+        $set: {
+          name: update.name,
+          brandName: update.brandName,
+          type: update.type,
+          description: update.description,
+          price: update.price,
+          rating: update.rating,
+          brandImage: update.brandImage,
+
+        }
       }
 
-      const result = await brandCarsCollection.updateOne(query,updatedDoc,options)
+      const result = await brandCarsCollection.updateOne(query, updatedDoc, options)
       res.send(result)
-  })
-  
+    })
+
     // load all 6 brands name and images
     app.get('/brandNames', async (req, res) => {
       const brands = req.body;
@@ -90,24 +91,33 @@ async function run() {
       res.send(result)
     })
 
-    // 
+    // Create cart data
     app.post("/addTocart", async (req, res) => {
       const cart = req.body;
       console.log("new post ", cart);
       const result = await cartCollection.insertOne(cart);
       console.log(result);
       res.send(result);
-  });
+    });
 
-  // 
-  app.get("/addTocart/:email", async (req, res) => {
-    const find = req.params.email;
-    console.log(find);
-    const query = { email: find };
-    const cursor = cartCollection.find(query);
-    const result = await cursor.toArray();
-    res.send(result);
-});
+    // Read cart every single data
+    app.get("/addTocart/:email", async (req, res) => {
+      const find = req.params.email;
+      console.log(find);
+      const query = { email: find };
+      const cursor = cartCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    // Delete cart data
+    app.delete("/addTocart/:id",async(req,res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await cartCollection.deleteOne(query)
+      console.log(result)
+      res.send(result)
+    })
 
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
