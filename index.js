@@ -31,6 +31,7 @@ async function run() {
     const brandCarsCollection = client.db("brandsCardDB").collection('brandsCars')
     const brandsNameCollection = client.db("brandsCardDB").collection('brandNames')
     const cartCollection = client.db("brandsCardDB").collection('cart')
+    const reviewsCollection = client.db("brandsCardDB").collection('customerReviews')
 
 
     //  create cars collection 
@@ -88,6 +89,14 @@ async function run() {
     app.get('/brandNames', async (req, res) => {
       const brands = req.body;
       const cursor = brandsNameCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    // load all customer reviews
+    app.get('/reviews',async(req,res)=>{
+      const brands = req.body;
+      const cursor = reviewsCollection.find()
       const result = await cursor.toArray()
       res.send(result)
     })
